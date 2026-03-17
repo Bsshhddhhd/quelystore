@@ -3,9 +3,11 @@ import Stripe from 'stripe';
 import { dataStore } from '@/lib/data';
 import { sendDiscordNotification, createPurchaseConfirmation } from '@/utils/discord';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2026-02-25.clover',
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2026-02-25.clover',
+  });
+}
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
     let event;
 
     try {
-      event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+      event = getStripe().webhooks.constructEvent(body, sig, endpointSecret);
     } catch (err) {
       return NextResponse.json(
         { error: `Webhook Error: ${err instanceof Error ? err.message : 'Unknown error'}` },
