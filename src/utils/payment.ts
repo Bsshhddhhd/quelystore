@@ -158,7 +158,7 @@ export async function capturePayPalPayment(paypalOrderId: string) {
       },
       body: JSON.stringify({}),
     });
-    const data = await res.json() as { status: string };
+    const data = await res.json() as { status: string; purchase_units?: Array<{ reference_id?: string }> };
 
     return {
       success: data.status === 'COMPLETED',
