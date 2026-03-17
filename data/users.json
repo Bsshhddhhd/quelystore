@@ -15,7 +15,7 @@
     "name": "FHAD",
     "email": "ahmasdzx@gmail.com",
     "provider": "email",
-    "passwordHash": "$2b$10$cApjiaPebFkfPzXBOeCBCuIQ5MxScK9AIboq7yEiNIhk2VwsnvVZa",
+    "passwordHash": "$2b$10$qwWzt.2NWEXMm1Zlls96zu.xjcdD6TCtQBPNaM70Zz2P/rNvfJxbq",
     "role": "admin",
     "createdAt": "2026-03-17T05:43:02.269Z",
     "updatedAt": "2026-03-17T05:52:50.763Z"
