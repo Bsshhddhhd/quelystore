@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 export interface DiscordMessage {
   embeds: Array<{
     title: string;
@@ -22,7 +20,11 @@ export async function sendDiscordNotification(
   message: DiscordMessage
 ) {
   try {
-    await axios.post(webhookUrl, message);
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    });
     return true;
   } catch (error) {
     console.error('Failed to send Discord notification:', error);

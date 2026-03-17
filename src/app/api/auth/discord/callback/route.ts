@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
 import { attachAuthCookie, createAuthToken, SessionUser } from '@/lib/auth';
 import { upsertDiscordUser } from '@/lib/users';
@@ -41,24 +40,19 @@ export async function GET(request: NextRequest) {
       redirect_uri: redirectUri,
     });
 
-    const tokenRes = await axios.post<DiscordTokenResponse>(
-      'https://discord.com/api/oauth2/token',
-      tokenBody.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
+    const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: tokenBody.toString(),
+    });
+    const tokenData = await tokenRes.json() as DiscordTokenResponse;
 
-    const accessToken = tokenRes.data.access_token;
-    const userRes = await axios.get<DiscordUser>('https://discord.com/api/users/@me', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    const accessToken = tokenData.access_token;
+    const userRes = await fetch('https://discord.com/api/users/@me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    const discordUser = userRes.data;
+    const discordUser = await userRes.json() as DiscordUser;
     const email = discordUser.email || `${discordUser.id}@discord.local`;
     const displayName = discordUser.global_name || discordUser.username;
     const avatarUrl = discordUser.avatar

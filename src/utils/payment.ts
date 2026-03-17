@@ -1,5 +1,4 @@
 import Stripe from 'stripe';
-import axios from 'axios';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2026-02-25.clover',
@@ -68,18 +67,17 @@ async function getPayPalAccessToken(): Promise<string> {
   }
 
   const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
-  const response = await axios.post(
-    `${PAYPAL_BASE_URL}/v1/oauth2/token`,
-    'grant_type=client_credentials',
-    {
-      headers: {
-        Authorization: `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    }
-  );
+  const res = await fetch(`${PAYPAL_BASE_URL}/v1/oauth2/token`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+  const data = await res.json() as { access_token: string };
 
-  return response.data.access_token;
+  return data.access_token;
 }
 
 export async function initializePayPalPayment(
@@ -89,9 +87,13 @@ export async function initializePayPalPayment(
   try {
     const accessToken = await getPayPalAccessToken();
 
-    const response = await axios.post(
-      `${PAYPAL_BASE_URL}/v2/checkout/orders`,
-      {
+    const response = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         intent: 'CAPTURE',
         purchase_units: [
           {
@@ -114,19 +116,18 @@ export async function initializePayPalPayment(
             },
           },
         },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+      }),
+    });
+
+    const responseData = await response.json() as {
+      id: string;
+      links?: Array<{ rel: string; href: string }>;
+    };
 
     // Find the approve link
-    const approveLink = response.data.links?.find(
+    const approveLink = responseData.links?.find(
       (link: { rel: string; href: string }) => link.rel === 'payer-action'
-    )?.href || response.data.links?.find(
+    )?.href || responseData.links?.find(
       (link: { rel: string; href: string }) => link.rel === 'approve'
     )?.href;
 
@@ -136,7 +137,7 @@ export async function initializePayPalPayment(
 
     return {
       success: true,
-      paypalOrderId: response.data.id,
+      paypalOrderId: responseData.id,
       approvalUrl: approveLink,
     };
   } catch (error) {
@@ -149,20 +150,19 @@ export async function capturePayPalPayment(paypalOrderId: string) {
   try {
     const accessToken = await getPayPalAccessToken();
 
-    const response = await axios.post(
-      `${PAYPAL_BASE_URL}/v2/checkout/orders/${paypalOrderId}/capture`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const res = await fetch(`${PAYPAL_BASE_URL}/v2/checkout/orders/${paypalOrderId}/capture`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json() as { status: string };
 
     return {
-      success: response.data.status === 'COMPLETED',
-      data: response.data,
+      success: data.status === 'COMPLETED',
+      data,
     };
   } catch (error) {
     console.error('PayPal capture error:', error);
