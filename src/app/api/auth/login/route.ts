@@ -23,7 +23,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'بيانات الدخول غير صحيحة' }, { status: 401 });
     }
 
-    const effectiveUser = (await syncUserRoleByEmail(user.email)) || user;
+    let effectiveUser = user;
+    try {
+      effectiveUser = (await syncUserRoleByEmail(user.email)) || user;
+    } catch {
+      // ignore sync errors on read-only filesystem
+    }
 
     const sessionUser: SessionUser = {
       id: effectiveUser._id,

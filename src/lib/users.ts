@@ -145,7 +145,11 @@ export async function syncUserRoleByEmail(email: string): Promise<UserRecord | n
       role: expectedRole,
       updatedAt: new Date().toISOString(),
     };
-    await saveUsers(users);
+    try {
+      await saveUsers(users);
+    } catch {
+      // read-only filesystem (e.g. Vercel) — skip write
+    }
   }
 
   return users[index];
