@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { attachAuthCookie, createAuthToken, SessionUser } from '@/lib/auth';
-import { upsertDiscordUser } from '@/lib/users';
+import { upsertDiscordUser, resolveRoleByEmail } from '@/lib/users';
 
 interface DiscordTokenResponse {
   access_token: string;
+  error?: string;
 }
 
 interface DiscordUser {
@@ -45,11 +46,15 @@ export async function GET(request: NextRequest) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: tokenBody.toString(),
     });
+
     const tokenData = await tokenRes.json() as DiscordTokenResponse;
 
-    const accessToken = tokenData.access_token;
+    if (!tokenData.access_token) {
+      return NextResponse.redirect(new URL('/login?error=discord_token', request.url));
+    }
+
     const userRes = await fetch('https://discord.com/api/users/@me', {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
 
     const discordUser = await userRes.json() as DiscordUser;
@@ -66,20 +71,19 @@ export async function GET(request: NextRequest) {
       avatarUrl,
     });
 
+    const role = resolveRoleByEmail(email);
+
     const sessionUser: SessionUser = {
       id: user._id,
       email: user.email,
       name: user.name,
-      role: user.role,
-      provider: user.provider,
+      role,
+      provider: 'discord',
     };
 
     const token = createAuthToken(sessionUser);
     const response = NextResponse.redirect(new URL('/', request.url));
-    response.cookies.set('discord_oauth_state', '', {
-      maxAge: 0,
-      path: '/',
-    });
+    response.cookies.set('discord_oauth_state', '', { maxAge: 0, path: '/' });
     return attachAuthCookie(response, token);
   } catch {
     return NextResponse.redirect(new URL('/login?error=discord_failed', request.url));

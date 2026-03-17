@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { attachAuthCookie, createAuthToken, SessionUser } from '@/lib/auth';
-import { getUserByEmail, syncUserRoleByEmail } from '@/lib/users';
+import { getUserByEmail, resolveRoleByEmail } from '@/lib/users';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,19 +23,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'بيانات الدخول غير صحيحة' }, { status: 401 });
     }
 
-    let effectiveUser = user;
-    try {
-      effectiveUser = (await syncUserRoleByEmail(user.email)) || user;
-    } catch {
-      // ignore sync errors on read-only filesystem
-    }
+    // Always resolve role from env (in case it changed)
+    const role = resolveRoleByEmail(email);
 
     const sessionUser: SessionUser = {
-      id: effectiveUser._id,
-      email: effectiveUser.email,
-      name: effectiveUser.name,
-      role: effectiveUser.role,
-      provider: effectiveUser.provider,
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role,
+      provider: user.provider,
     };
 
     const token = createAuthToken(sessionUser);

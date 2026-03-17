@@ -22,13 +22,11 @@ function getAdminEmails(): string[] {
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-
   return Array.from(new Set([single, ...many].filter(Boolean)));
 }
 
 export function resolveRoleByEmail(email: string): 'admin' | 'user' {
-  const normalized = email.trim().toLowerCase();
-  return getAdminEmails().includes(normalized) ? 'admin' : 'user';
+  return getAdminEmails().includes(email.trim().toLowerCase()) ? 'admin' : 'user';
 }
 
 export async function getUsers(): Promise<UserRecord[]> {
@@ -40,8 +38,13 @@ export async function getUsers(): Promise<UserRecord[]> {
   }
 }
 
+// Save safely — on Vercel filesystem is read-only, so we silently skip writes
 async function saveUsers(users: UserRecord[]): Promise<void> {
-  await fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2));
+  try {
+    await fs.writeFile(USERS_PATH, JSON.stringify(users, null, 2));
+  } catch {
+    // read-only filesystem (Vercel production) — skip silently
+  }
 }
 
 export async function getUserByEmail(email: string): Promise<UserRecord | null> {
@@ -59,12 +62,11 @@ export async function upsertDiscordUser(params: {
   const users = await getUsers();
   const normalized = params.email.trim().toLowerCase();
   const now = new Date().toISOString();
+  const role = resolveRoleByEmail(normalized);
 
   const index = users.findIndex(
     (u) => u.email.toLowerCase() === normalized || u.discordId === params.discordId
   );
-
-  const role = resolveRoleByEmail(normalized);
 
   if (index >= 0) {
     users[index] = {
@@ -127,30 +129,4 @@ export async function createEmailUser(params: {
   users.push(user);
   await saveUsers(users);
   return user;
-}
-
-export async function syncUserRoleByEmail(email: string): Promise<UserRecord | null> {
-  const users = await getUsers();
-  const normalized = email.trim().toLowerCase();
-  const index = users.findIndex((u) => u.email.toLowerCase() === normalized);
-
-  if (index === -1) {
-    return null;
-  }
-
-  const expectedRole = resolveRoleByEmail(normalized);
-  if (users[index].role !== expectedRole) {
-    users[index] = {
-      ...users[index],
-      role: expectedRole,
-      updatedAt: new Date().toISOString(),
-    };
-    try {
-      await saveUsers(users);
-    } catch {
-      // read-only filesystem (e.g. Vercel) — skip write
-    }
-  }
-
-  return users[index];
 }

@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message === 'EMAIL_EXISTS') {
       return NextResponse.json({ error: 'الإيميل مستخدم مسبقاً' }, { status: 409 });
     }
-
     return NextResponse.json({ error: 'فشل إنشاء الحساب' }, { status: 500 });
   }
 }
