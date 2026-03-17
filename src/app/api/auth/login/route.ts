@@ -37,7 +37,9 @@ export async function POST(request: NextRequest) {
     const token = createAuthToken(sessionUser);
     const response = NextResponse.json({ success: true, user: sessionUser });
     return attachAuthCookie(response, token);
-  } catch {
-    return NextResponse.json({ error: 'فشل تسجيل الدخول' }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[LOGIN ERROR]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
