@@ -1,0 +1,16 @@
+[
+  {
+    "name": "بوتات اغاني",
+    "description": "افضل بوتات ب الشرق الاوسط",
+    "price": 2,
+    "category": "music",
+    "image": "https://media.discordapp.net/attachments/1403008668534050826/1462880475285553333/music.png?ex=69b9a11c&is=69b84f9c&hm=0e5053109ffc083ddf7db791939da7182651b1d596273240422eaf23ebb5f9aa&=&format=webp&quality=lossless&width=563&height=563",
+    "features": [
+      "سريع فوري"
+    ],
+    "stock": 1,
+    "_id": "1773726856760",
+    "createdAt": "2026-03-17T05:54:16.760Z",
+    "updatedAt": "2026-03-17T05:54:16.760Z"
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "_id": "1773726123401",
+    "name": "(SiLVER)",
+    "email": "lindaoxw25ej@gmail.com",
+    "provider": "discord",
+    "discordId": "934622545271984131",
+    "avatarUrl": "https://cdn.discordapp.com/avatars/934622545271984131/091bbc20f981767935106bf975e02f20.png",
+    "role": "user",
+    "createdAt": "2026-03-17T05:42:03.401Z",
+    "updatedAt": "2026-03-17T05:47:20.002Z"
+  },
+  {
+    "_id": "1773726182269",
+    "name": "FHAD",
+    "email": "ahmasdzx@gmail.com",
+    "provider": "email",
+    "passwordHash": "$2b$10$cApjiaPebFkfPzXBOeCBCuIQ5MxScK9AIboq7yEiNIhk2VwsnvVZa",
+    "role": "admin",
+    "createdAt": "2026-03-17T05:43:02.269Z",
+    "updatedAt": "2026-03-17T05:52:50.763Z"
+  },
+  {
+    "_id": "1773726292773",
+    "name": "Local Test",
+    "email": "localtest244174258@example.com",
+    "provider": "email",
+    "passwordHash": "$2b$10$2xCD4LdIbQETrMwPBLc9BusDiUE/onSabSBQYEzBdi2MhI.vfaKre",
+    "role": "user",
+    "createdAt": "2026-03-17T05:44:52.773Z",
+    "updatedAt": "2026-03-17T05:44:52.773Z"
+  }
+]
