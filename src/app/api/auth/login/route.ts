@@ -40,6 +40,6 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[LOGIN ERROR]', msg);
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ error: 'فشل تسجيل الدخول' }, { status: 500 });
   }
 }

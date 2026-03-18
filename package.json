@@ -17,7 +17,7 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.3.1",
     "jsonwebtoken": "^9.0.3",
-    "next": "^13.5.2",
+    "next": "13.5.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "stripe": "^20.4.1",
@@ -29,8 +29,8 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.27",
-    "eslint": "^10.0.3",
-    "eslint-config-next": "^16.1.7",
+    "eslint": "8.57.1",
+    "eslint-config-next": "13.5.11",
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.1"
   }
